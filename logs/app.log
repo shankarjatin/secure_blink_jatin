@@ -30,3 +30,4 @@ info: ::1 - - [17/Dec/2024:11:58:16 +0000] "POST /api/auth/login HTTP/1.1" 500 1
 info: ::1 - - [17/Dec/2024:11:58:30 +0000] "POST /api/auth/login HTTP/1.1" 500 12 "-" "PostmanRuntime/7.43.0" {"timestamp":"2024-12-17T11:58:30.605Z"}
 info: ::1 - - [17/Dec/2024:11:59:17 +0000] "POST /api/auth/login HTTP/1.1" 500 12 "-" "PostmanRuntime/7.43.0" {"timestamp":"2024-12-17T11:59:17.917Z"}
 info: ::1 - - [17/Dec/2024:11:59:19 +0000] "POST /api/auth/login HTTP/1.1" 500 12 "-" "PostmanRuntime/7.43.0" {"timestamp":"2024-12-17T11:59:19.759Z"}
+info: ::1 - - [17/Dec/2024:12:02:30 +0000] "POST /api/auth/login HTTP/1.1" 200 302 "-" "PostmanRuntime/7.43.0" {"timestamp":"2024-12-17T12:02:30.813Z"}
