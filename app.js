@@ -11,6 +11,7 @@ const cookieParser = require('cookie-parser');
 const connectDB = require('./config/db');
 const { logger } = require('./logger');
 
+
 dotenv.config();
 const app = express();
 
@@ -44,5 +45,6 @@ app.get('/get-csrf-token', (req, res) => {
 
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
+app.use('/api/user', require('./routes/feedback'));
 
 module.exports = app; // Export app without listening
