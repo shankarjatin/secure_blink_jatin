@@ -66,6 +66,8 @@ exports.login = async (req, res) => {
         await user.save();
 
         const token = jwt.sign({ id: user._id, email: user.email , role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+  
+
         res.json({ token, email: user.email , role: user.role });
     } catch (error) {
         res.status(500).send('Server error');
@@ -117,7 +119,6 @@ exports.forgotPassword = async (req, res) => {
       const hashedPassword = await bcrypt.hash(newPassword, 10);
       user.password = hashedPassword;
       await user.save();
-  
       res.json({ msg: 'Password has been reset successfully' });
     } catch (error) {
       if (error.name === 'TokenExpiredError') {
