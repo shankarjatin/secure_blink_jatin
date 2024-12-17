@@ -1,4 +1,9 @@
 const express = require('express');
+const helmet = require('helmet');
+const xssClean = require('xss-clean');
+const csrf = require('csurf');
+const rateLimit = require('express-rate-limit');
+
 const dotenv = require('dotenv');
 // const passport = require('passport');
 const session = require('express-session');
@@ -20,7 +25,22 @@ app.use(session({
   saveUninitialized: false,
 }));
 app.use(cookieParser());
+app.use(helmet());
 
+// 2. **Sanitize User Inputs** - XSS protection
+app.use(xssClean());
+
+// 3. **Rate Limiting** - Prevent brute force attacks
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Max 100 requests per IP
+  message: 'Too many requests, please try again later',
+});
+app.use(limiter);
+
+// 4. **CSRF Protection**
+const csrfProtection = csrf({ cookie: true });
+app.use(csrfProtection);
 
 connectDB();
 
