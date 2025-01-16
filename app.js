@@ -16,7 +16,12 @@ dotenv.config();
 const app = express();
 
 // Middleware setup
-app.use(cors());
+const corsOptions = {
+  origin: 'http://localhost:8002',  // Change to your frontend's origin
+  credentials: true                // Allow credentials (cookies)
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
 app.use(helmet());
@@ -26,8 +31,9 @@ app.use(session({
   saveUninitialized: false,
 }));
 
-const csrfProtection = csrf({ cookie: true });
-app.use(csrfProtection);
+// const csrfProtection = csrf({ cookie: true });
+// app.use(csrfProtection);
+
 
 // Logging
 app.use(morgan('combined', {

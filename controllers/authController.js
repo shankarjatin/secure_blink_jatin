@@ -2,6 +2,10 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
+const csrf = require('csurf');
+const cookieParser = require('cookie-parser');
+// CSRF protection middleware
+const csrfProtection = csrf({ cookie: true });
 
 const { LOCAL_API_URL, PROD_API_URL } = require("../utils/constants");
 const apiUrl =
@@ -51,27 +55,42 @@ exports.signup = async (req, res) => {
     res.status(500).send("Server error");
   }
 };
-
 exports.login = async (req, res) => {
-    const { email, password } = req.body;
+  const { email, password } = req.body;
+ 
+  try {
+      // Find the user by email
+      
+      const user = await User.findOne({ email });
+      if (!user) return res.status(400).json({ msg: 'Invalid credentials' });
 
-    try {
-        const user = await User.findOne({ email });
-        if (!user) return res.status(400).json({ msg: 'Invalid credentials' });
+      // Compare the provided password with the stored hashed password
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) return res.status(400).json({ msg: 'Invalid credentials' });
 
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) return res.status(400).json({ msg: 'Invalid credentials' });
+      // Generate JWT token
+      const token = jwt.sign({ id: user._id, email: user.email, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-        // Add referral ID to user if it doesn't already have one and there's a referral in cookies
-        await user.save();
+      // Generate CSRF token
+      // const csrfToken = req.csrfToken();  // Generate CSRF token
 
-        const token = jwt.sign({ id: user._id, email: user.email , role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
-  
+      // Set CSRF token as an HTTP-only cookie
+//       res.cookie('csrfToken', csrfToken, { httpOnly: true, secure: true });
+// console.log(csrfToken,token)
+      // Send both JWT and CSRF tokens in the response
+    // Generate CSRF token
 
-        res.json({ token, email: user.email , role: user.role });
-    } catch (error) {
-        res.status(500).send('Server error');
-    }
+// Set CSRF token as an HTTP-only cookie
+      res.json({
+          token,
+          // csrfToken,
+          email: user.email,
+          role: user.role
+      });
+  } catch (error) {
+    console.log(error);
+      res.status(500).send('Server error');
+  }
 };
 
 exports.forgotPassword = async (req, res) => {
