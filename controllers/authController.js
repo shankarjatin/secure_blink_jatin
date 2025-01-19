@@ -4,12 +4,33 @@ const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const csrf = require('csurf');
 const cookieParser = require('cookie-parser');
+const { check, validationResult } = require('express-validator');
+
+// User validation rules
+exports.validateUser = [
+    check('name', 'Name is required').not().isEmpty(),
+    check('email', 'Please include a valid email').isEmail(),
+    check('password', 'Please enter a password with 6 or more characters').isLength({ min: 6 }),
+    check('role', 'Role must be either user or admin')
+    .not().isEmpty()
+    .isIn(['user', 'admin']),
+    // You can add more rules here based on your requirements
+];
+
+// Middleware to check validation results
+exports.validate = (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+    next();
+};
+
 // CSRF protection middleware
 const csrfProtection = csrf({ cookie: true });
 
 const { LOCAL_API_URL, PROD_API_URL } = require("../utils/constants");
-const apiUrl =
-  process.env.NODE_ENV === "development" ? PROD_API_URL : LOCAL_API_URL;
+const apiUrl = process.env.NODE_ENV === "development" ? PROD_API_URL : LOCAL_API_URL;
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 465, // Secure connection using SSL
@@ -20,12 +41,21 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// reCAPTCHA verification function
+// Email validation function
+const isValidEmail = (email) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
 
-exports.signup = async (req, res) => {
+exports.signup =[
+exports.validateUser,
+exports.validate, async (req, res) => {
   const { name, email, password, role } = req.body;
 
-  // Verify reCAPTCHA token
+  // Verify if the email is valid
+  if (!isValidEmail(email)) {
+    return res.status(400).json({ msg: "Invalid email format" });
+  }
 
   try {
     let user = await User.findOne({ email });
@@ -33,9 +63,6 @@ exports.signup = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Check for referral ID in cookies
-
-    // Create new user with referral ID if available
     user = new User({
       name,
       email,
@@ -54,44 +81,38 @@ exports.signup = async (req, res) => {
     console.log(error);
     res.status(500).send("Server error");
   }
-};
+}];
+
 exports.login = async (req, res) => {
   const { email, password } = req.body;
- 
+
+  // Verify if the email is valid
+  if (!isValidEmail(email)) {
+    return res.status(400).json({ msg: "Invalid email format" });
+  }
+
   try {
-      // Find the user by email
-      
-      const user = await User.findOne({ email });
-      if (!user) return res.status(400).json({ msg: 'Invalid credentials' });
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ msg: 'Invalid credentials' });
 
-      // Compare the provided password with the stored hashed password
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) return res.status(400).json({ msg: 'Invalid credentials' });
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(400).json({ msg: 'Invalid credentials' });
 
-      // Generate JWT token
-      const token = jwt.sign({ id: user._id, email: user.email, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ id: user._id, email: user.email, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-      // Generate CSRF token
-      // const csrfToken = req.csrfToken();  // Generate CSRF token
-
-      // Set CSRF token as an HTTP-only cookie
-//       res.cookie('csrfToken', csrfToken, { httpOnly: true, secure: true });
-// console.log(csrfToken,token)
-      // Send both JWT and CSRF tokens in the response
-    // Generate CSRF token
-
-// Set CSRF token as an HTTP-only cookie
-      res.json({
-          token,
-          // csrfToken,
-          email: user.email,
-          role: user.role
-      });
+    res.json({
+      token,
+      email: user.email,
+      role: user.role
+    });
   } catch (error) {
     console.log(error);
-      res.status(500).send('Server error');
+    res.status(500).send('Server error');
   }
 };
+
+// Other functions remain unchanged
+
 
 exports.forgotPassword = async (req, res) => {
     const { email } = req.body;
