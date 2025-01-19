@@ -6,7 +6,7 @@ const csrf = require('csurf');
 const router = express.Router();
 const csrfProtection = csrf({ cookie: true });
 
-router.get('/users', verifyAdmin , csrfProtection , getAllUser);
-router.get('/feedback',verifyAdmin,  csrfProtection, feedbackController.getAllFeedback);
+router.get('/users', verifyAdmin ,  getAllUser);
+router.get('/feedback',verifyAdmin, feedbackController.getAllFeedback);
 
 module.exports = router;

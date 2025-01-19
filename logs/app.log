@@ -113,3 +113,5 @@ info: ::1 - - [05/Jan/2025:12:59:02 +0000] "POST /api/auth/forgot-password HTTP/
 info: ::1 - - [05/Jan/2025:13:04:54 +0000] "GET /get-csrf-token HTTP/1.1" 200 52 "-" "axios/1.7.9" {"timestamp":"2025-01-05T13:04:54.269Z"}
 info: ::1 - - [05/Jan/2025:13:07:06 +0000] "POST /api/auth/login HTTP/1.1" 500 12 "-" "PostmanRuntime/7.43.0" {"timestamp":"2025-01-05T13:07:06.133Z"}
 info: ::1 - - [05/Jan/2025:13:07:54 +0000] "POST /api/auth/login HTTP/1.1" 200 302 "-" "PostmanRuntime/7.43.0" {"timestamp":"2025-01-05T13:07:54.466Z"}
+info: ::1 - - [16/Jan/2025:12:48:50 +0000] "POST /api/auth/login HTTP/1.1" 200 302 "-" "PostmanRuntime/7.43.0" {"timestamp":"2025-01-16T12:48:50.099Z"}
+info: ::ffff:127.0.0.1 - - [19/Jan/2025:05:04:50 +0000] "GET /get-csrf-token HTTP/1.1" 500 10956 "-" "-" {"timestamp":"2025-01-19T05:04:50.198Z"}
